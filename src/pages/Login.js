@@ -38,7 +38,6 @@ const Login = () => {
                 });
                 setData({name:'', email:'', password:'', error: null, loading: false});
                 navigate('/');
-                   
         } catch (err) {
             setData({...data, error: err.message, loading: false});
         }
