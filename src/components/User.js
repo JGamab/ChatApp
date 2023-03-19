@@ -1,8 +1,9 @@
 import React from 'react'
 import Img from '../default-avatar.png'
-const User = ({user}) => {
+
+const User = ({user, selectUser}) => {
   return (
-    <div className='use_wrapper'>
+    <div className='use_wrapper' onClick={() => selectUser(user)}>
     <div className='user_info'>
         <div className='user_detail'>
             <img src={user.avatar || Img} alt='avatar' className='avatar' />
