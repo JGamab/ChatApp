@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {db, auth, storage} from '../firebase';
-import {collection, query, where, onSnapshot, addDoc, Timestamp, orderBy, doc} from 'firebase/firestore';
+import {collection, query, where, onSnapshot, addDoc, Timestamp, orderBy, doc, setDoc, getDoc, updateDoc} from 'firebase/firestore';
 import User from '../components/User';
 import MessageForm from '../components/MessageForm';
 import {ref, getDownloadURL, uploadBytes} from 'firebase/storage';
@@ -30,7 +30,8 @@ const Home = () => {
     return () => unsub();
 
   }, [])
-  const selectUser = (user) => {
+
+  const selectUser = async (user) => {
     setChat(user);
     console.log(user);
 
@@ -40,13 +41,21 @@ const Home = () => {
     const msgsRef = collection(db, 'messages', id, 'chat')
     const q = query(msgsRef, orderBy('createdAt', 'asc'))
 
-    onSnapshot(q, querySnaphot => {
+    onSnapshot(q, (querySnaphot) => {
       let msgs = []
       querySnaphot.forEach(doc => {
         msgs.push(doc.data())
       })
       setMsgs(msgs)
     })
+    
+    // get last chat between logged in user and selected user
+    const docSnap = await getDoc(doc(db, 'lastChat', id))
+    // if last chat exists and chat is from selected user
+    if(docSnap.data() && docSnap.data().from !== user1) {
+      // update last chat doc, set unread to false
+      await updateDoc(doc(db, 'lastChat', id) , {unread: false});
+    }
   }
 
   console.log(msgs);
@@ -65,15 +74,29 @@ const Home = () => {
       url = downUrl; 
     }
 
-    await addDoc(collection(db, 'messages', id,'chat'), {text, from: user1, to: user2, createdAt: Timestamp.fromDate(new Date()),
+    await addDoc(collection(db, 'messages', id,'chat'), {
+      text, 
+      from: user1, 
+      to: user2, 
+      createdAt: Timestamp.fromDate(new Date()),
       media: url || "",
     })
+
+    await setDoc(doc(db, 'lastChat', id), {
+      text, 
+      from: user1, 
+      to: user2, 
+      createdAt: Timestamp.fromDate(new Date()),
+      media: url || "", 
+      unread: true,
+    })
+
     setText("");
   }
   return (
         <div className='home_container'>
         <div className='users_container'>
-          {users.map(user => <User key={user.uid} user={user} selectUser={selectUser} />)}
+          {users.map(user => <User key={user.uid} user={user} selectUser={selectUser} user1={user1} chat={chat} />)}
         </div>
         <div className='messages_container'>
           {chat ? ( 
