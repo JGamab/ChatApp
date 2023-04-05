@@ -1,24 +1,35 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {db, auth, storage} from '../firebase';
 import {collection, query, where, onSnapshot, addDoc, Timestamp, orderBy, doc, setDoc, getDoc, updateDoc} from 'firebase/firestore';
 import User from '../components/User';
 import MessageForm from '../components/MessageForm';
 import {ref, getDownloadURL, uploadBytes} from 'firebase/storage';
 import Message from '../components/Message';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/auth';
 
 const Home = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [chat, setChat] = useState("");
   const [text, setText] = useState("");
   const [img, setImg] = useState("");
   const [msgs, setMsgs] = useState([]);
+  const {user: userAuth} = useContext(AuthContext);
 
-  const user1 = auth.currentUser.uid
+  const user1 = auth.currentUser ? auth.currentUser.uid : null;
+
+  useEffect(() => {
+    if(!userAuth) {
+      navigate("/Login");
+    }
+  }, [userAuth]);
 
   useEffect(() => {
     const usersRef= collection(db, 'users')
     //qeury obj
     const q = query(usersRef, where('uid', 'not-in',[user1]))
+
     //execution
     const unsub = onSnapshot(q, (querySnaphot) => {
       let users = [];
@@ -29,7 +40,7 @@ const Home = () => {
     })
     return () => unsub();
 
-  }, [])
+  }, []);
 
   const selectUser = async (user) => {
     setChat(user);

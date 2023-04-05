@@ -244,6 +244,7 @@ section.form {
   height: calc(100vh - 200px);
   overflow-y: auto;
   border-bottom: 1px solid var(--color-6);
+  overflow-wrap: break-word;
 }
 .message_wrapper {
   margin-top: 5px;
@@ -269,11 +270,11 @@ section.form {
   text-align: right;
 }
 .me {
-  background: var(--color-1);
+  background: var(--color-6);
   color: white;
 }
 .friend {
-  background: var(--color-6);
+  background: var(--color-1);
 }
 
 .sm_screen {
