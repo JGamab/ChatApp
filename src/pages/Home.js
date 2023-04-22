@@ -17,6 +17,7 @@ const Home = () => {
   const [msgs, setMsgs] = useState([]);
   const {user: userAuth} = useContext(AuthContext);
 
+  //checks if there's a user
   const user1 = auth.currentUser ? auth.currentUser.uid : null;
 
   useEffect(() => {
